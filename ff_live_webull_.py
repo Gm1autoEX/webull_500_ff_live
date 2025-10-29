@@ -1004,22 +1004,22 @@ class ModernButton(QPushButton):
     def __init__(self, text, parent=None, accent_color="#8b5cf6"):
         super().__init__(text, parent)
         self.accent_color = accent_color
-        self.setMinimumHeight(28)
+        self.setMinimumHeight(24)
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        
+
         # Convert hex to rgba with transparency
         color = QColor(accent_color)
         r, g, b = color.red(), color.green(), color.blue()
-        
+
         self.setStyleSheet(f"""
             QPushButton {{
                 background-color: rgba({r}, {g}, {b}, 0.2);
                 color: white;
                 border: 1px solid rgba(255, 255, 255, 0.2);
                 border-radius: 4px;
-                padding: 6px 12px;
+                padding: 4px 8px;
                 font-weight: 500;
-                font-size: 12px;
+                font-size: 11px;
                 backdrop-filter: blur(10px);
                 -webkit-backdrop-filter: blur(10px);
             }}
@@ -2726,6 +2726,12 @@ class HFTInteractiveNewsClient(QMainWindow):
         self.unmute_all_button.clicked.connect(self.unmute_all)
         self.mute_layout.addWidget(self.unmute_all_button)
 
+        self.clear_all_button = ModernButton("Clear All", accent_color="#ef4444")
+        self.clear_all_button.setFixedWidth(80)
+        self.clear_all_button.setToolTip("Clear all trees, charts, and data - complete reset")
+        self.clear_all_button.clicked.connect(self.clear_all)
+        self.mute_layout.addWidget(self.clear_all_button)
+
         self.alarms_layout.addLayout(self.mute_layout)
 
         self.control_layout.addLayout(self.alarms_layout)
@@ -2824,9 +2830,9 @@ class HFTInteractiveNewsClient(QMainWindow):
                     color: white;
                     border: 1px solid rgba(16, 185, 129, 0.5);
                     border-radius: 4px;
-                    padding: 6px 12px;
+                    padding: 4px 8px;
                     font-weight: 500;
-                    font-size: 12px;
+                    font-size: 11px;
                     backdrop-filter: blur(10px);
                     -webkit-backdrop-filter: blur(10px);
                 }}
@@ -3000,6 +3006,29 @@ class HFTInteractiveNewsClient(QMainWindow):
         self.last_clicked_top_item = None
         self.last_clicked_news_item = None
         QTimer.singleShot(0, lambda: self.update_top_tree_display(force=True))
+
+    @profile_function
+    def clear_all(self):
+        """Clear all trees, charts, and data - complete reset to blank state"""
+        # Clear trees immediately for instant visual feedback
+        self.news_tree.clear()
+        self.top_tree.clear()
+
+        # Batch unsubscribe all symbols asynchronously
+        symbols_to_remove = list(self.subscribed_symbols)
+        for symbol in symbols_to_remove:
+            asyncio.create_task(self.unsubscribe_and_remove_data(symbol))
+
+        # Reset selection state
+        self.selected_ric = None
+        self.last_clicked_top_item = None
+        self.last_clicked_news_item = None
+
+        # Clear pending items
+        self.pending_news_items.clear()
+
+        # Show notification
+        self.show_notification(f"Cleared {len(symbols_to_remove)} symbols", "success", 2000)
 
     @profile_function
     def switch_tab(self, direction):
