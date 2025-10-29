@@ -3008,7 +3008,7 @@ class HFTInteractiveNewsClient(QMainWindow):
         QTimer.singleShot(0, lambda: self.update_top_tree_display(force=True))
 
     @profile_function
-    def clear_all(self):
+    def clear_all(self, checked=False):
         """Clear all trees, charts, and data - complete reset to blank state"""
         # Clear trees immediately for instant visual feedback
         self.news_tree.clear()
