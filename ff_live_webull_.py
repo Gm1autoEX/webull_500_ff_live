@@ -195,12 +195,10 @@ def take_action_sync(symbol, quantity, mouse_button):
         typewrite_text_sync(str(quantity))
         time.sleep(0.1)
 
-        if mouse_button == Qt.MouseButton.LeftButton:
-            final_coords = (1227, 767)
-        else:
-            final_coords = (1227, 767)
-
-        mouse_controller.position = final_coords
+        # Perform the final action click (same coordinates for both left and right click)
+        final_coords = (1227, 767)
+        click_coordinates_sync(final_coords[0], final_coords[1])
+        time.sleep(0.1)
 
         logging.info(
             f"Action taken ({'Left' if mouse_button == Qt.MouseButton.LeftButton else 'Right'} Click): "
